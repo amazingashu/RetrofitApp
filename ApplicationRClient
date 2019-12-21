@@ -1,0 +1,40 @@
+import android.util.Base64
+import android.util.Log
+import okhttp3.OkHttpClient
+import okhttp3.internal.tls.OkHostnameVerifier
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import java.util.*
+
+object ApplicationRClient {
+    private val Auth="Basic "+Base64.encodeToString("Ashu:123456".toByteArray(),Base64.NO_WRAP)
+
+    private const val BASE_URL ="http://acronymsolutions.in/Bikers/API/public/"
+
+    private  val okHttpClient=OkHttpClient.Builder()
+        .addInterceptor{chain ->
+            val original=chain.request()
+
+            val requestBuilder=original.newBuilder()
+                .addHeader("Auhtorization",Auth)
+                .method(original.method(),original.body())
+
+            val request=requestBuilder.build()
+            chain.proceed(request)
+
+        }.build()
+
+
+    val instance: Api by lazy{
+        val retrofit=Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttpClient)
+            .build()
+
+        Log.d("TAG", BASE_URL)
+        retrofit.create(Api::class.java)
+    }
+}
+
+
